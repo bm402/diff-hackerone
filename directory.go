@@ -17,13 +17,15 @@ type GqlDirectoryRequestBody struct {
 
 // Asset is an in scope asset for a program
 type Asset struct {
-	ID       string
-	Type     string
-	Severity string
-	Bounty   bool
+	Name     string `json:"name"`
+	Type     string `json:"type"`
+	Severity string `json:"severity"`
+	Bounty   bool   `json:"bounty"`
 }
 
 func getDirectory() map[string][]Asset {
+	log.Print("Retrieving directory from HackerOne")
+
 	directory := make(map[string][]Asset)
 	hasNextPage := true
 	cursor := ""
@@ -45,7 +47,7 @@ func getDirectory() map[string][]Asset {
 				assetNode := asset.(map[string]interface{})["node"]
 
 				asset := Asset{
-					ID:       assetNode.(map[string]interface{})["asset_identifier"].(string),
+					Name:     assetNode.(map[string]interface{})["asset_identifier"].(string),
 					Type:     assetNode.(map[string]interface{})["asset_type"].(string),
 					Severity: assetNode.(map[string]interface{})["max_severity"].(string),
 					Bounty:   assetNode.(map[string]interface{})["eligible_for_bounty"].(bool),
