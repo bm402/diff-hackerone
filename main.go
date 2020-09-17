@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"log"
 	"os"
 )
@@ -33,11 +34,13 @@ func main() {
 
 func logger(message interface{}) {
 	switch message.(type) {
-	case string, error:
+	case string:
 		log.Print(message)
 		flog.Print(message)
-
+	case error:
+		log.Fatal(message)
+		flog.Fatal(message)
 	default:
-		logger("Unknown log type")
+		logger(errors.New("Unknown log type"))
 	}
 }

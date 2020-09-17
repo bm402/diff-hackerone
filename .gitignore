@@ -17,3 +17,6 @@
 # Log files
 diff.log
 
+# Misc
+.DS_Store
+
