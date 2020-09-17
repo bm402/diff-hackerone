@@ -2,10 +2,20 @@ package main
 
 import (
 	"log"
+	"os"
 )
 
+var flog *log.Logger
+
 func main() {
-	log.Print("== diff-hackerone ==")
+	f, err := os.OpenFile("diff.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		logger(err)
+	}
+	defer f.Close()
+	flog = log.New(f, "", log.LstdFlags)
+
+	logger("== diff-hackerone ==")
 
 	connectToDatabase()
 	directory := getDirectory()
@@ -17,6 +27,17 @@ func main() {
 		insertFullDirectory(directory)
 	}
 
-	log.Print("== end diff-hackerone ==")
-	log.Print("")
+	logger("== end diff-hackerone ==")
+	logger("")
+}
+
+func logger(message interface{}) {
+	switch message.(type) {
+	case string, error:
+		log.Print(message)
+		flog.Print(message)
+
+	default:
+		logger("Unknown log type")
+	}
 }

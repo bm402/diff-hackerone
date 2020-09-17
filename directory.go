@@ -24,7 +24,7 @@ type Asset struct {
 }
 
 func getDirectory() map[string][]Asset {
-	log.Print("Retrieving directory from HackerOne")
+	logger("Retrieving directory from HackerOne")
 
 	directory := make(map[string][]Asset)
 	hasNextPage := true
