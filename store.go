@@ -123,19 +123,36 @@ func updateDirectory(directory map[string][]Asset) {
 		if isProgramUpdated {
 			if len(newAssets) > 0 {
 				logger("New asset(s) for program \"" + name + "\" found:")
+				slackMessage := "New asset(s) for program \"" + name + "\" found:\n"
+				isPaid := false
 				for _, newAsset := range newAssets {
 					logger("\t" + newAsset)
+					slackMessage += "\t" + newAsset + "\n"
+					if newAsset[len(newAsset)-6:len(newAsset)-2] == "paid" {
+						isPaid = true
+					}
 				}
+				sendSlackNotification("updated-bug-bounty-programs", slackMessage, isPaid)
 			}
+
 			if len(changedAssets) > 0 {
 				logger("Changed asset(s) for program \"" + name + "\" found:")
+				slackMessage := "Changed asset(s) for program \"" + name + "\" found:\n"
+				isPaid := false
 				for _, changedAsset := range changedAssets {
 					logger("\t" + changedAsset)
+					slackMessage += "\t" + changedAsset + "\n"
+					if changedAsset[len(changedAsset)-6:len(changedAsset)-2] == "paid" {
+						isPaid = true
+					}
 				}
+				sendSlackNotification("updated-bug-bounty-programs", slackMessage, isPaid)
 			}
+
 			if len(assets)-len(newAssets) < len(existingDirectory[name]) {
 				logger("Deleting dead asset(s) from program \"" + name + "\"")
 			}
+
 			updateProgram(name, assets)
 		}
 
@@ -153,9 +170,17 @@ func updateDirectory(directory map[string][]Asset) {
 
 func insertNewProgram(name string, assets []Asset) {
 	logger("New program \"" + name + "\" found with the following assets:")
+	slackMessage := "New program \"" + name + "\" found with the following assets:\n"
+	isPaid := false
+
 	for _, asset := range assets {
 		logger("\t" + stringifyAsset(asset))
+		slackMessage += "\t" + stringifyAsset(asset) + "\n"
+		if asset.Bounty {
+			isPaid = true
+		}
 	}
+	sendSlackNotification("new-bug-bounty-programs", slackMessage, isPaid)
 
 	directoryDocument := DirectoryDocument{
 		Name:   name,
