@@ -38,6 +38,7 @@ func logger(message interface{}) {
 		log.Print(message)
 		flog.Print(message)
 	case error:
+		sendSlackErrorNotification(message.(error))
 		log.Fatal(message)
 		flog.Fatal(message)
 	default:
