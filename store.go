@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"strconv"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -19,7 +20,7 @@ type DirectoryDocument struct {
 var collection *mongo.Collection
 
 func connectToDatabase() {
-	log.Print("Connecting to MongoDB")
+	logger("Connecting to MongoDB")
 
 	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
 
@@ -42,12 +43,12 @@ func getStoredDirectoryCount() int {
 		log.Fatal(err)
 	}
 
-	log.Print("Number of stored programs: ", count)
+	logger("Number of stored programs: " + strconv.FormatInt(count, 10))
 	return int(count)
 }
 
 func insertFullDirectory(directory map[string][]Asset) {
-	log.Print("Inserting full directory into diff-hackerone.directory")
+	logger("Inserting full directory into diff-hackerone.directory")
 
 	for name, assets := range directory {
 		directoryDocument := DirectoryDocument{
@@ -63,7 +64,7 @@ func insertFullDirectory(directory map[string][]Asset) {
 }
 
 func updateDirectory(directory map[string][]Asset) {
-	log.Print("Updating directory in database...")
+	logger("Updating directory in database...")
 
 	// Get full existing directory
 	var existingDirectoryList []DirectoryDocument
@@ -122,31 +123,31 @@ func updateDirectory(directory map[string][]Asset) {
 		// Update program
 		if isProgramUpdated {
 			if len(newAssets) > 0 {
-				log.Print("New asset(s) for program \"", name, "\" found:")
+				logger("New asset(s) for program \"" + name + "\" found:")
 				for _, newAsset := range newAssets {
-					log.Print("\t", newAsset)
+					logger("\t" + newAsset)
 				}
 			}
 			if len(changedAssets) > 0 {
-				log.Print("Changed asset(s) for program \"", name, "\" found:")
+				logger("Changed asset(s) for program \"" + name + "\" found:")
 				for _, changedAsset := range changedAssets {
-					log.Print("\t", changedAsset)
+					logger("\t" + changedAsset)
 				}
 			}
 			if len(assets)-len(newAssets) < len(existingDirectory[name]) {
-				log.Print("Deleting dead asset(s) from program \"", name, "\"")
+				logger("Deleting dead asset(s) from program \"" + name + "\"")
 			}
 			updateProgram(name, assets)
 		}
 	}
 
-	log.Print("Updated program directory")
+	logger("Updated program directory")
 }
 
 func insertNewProgram(name string, assets []Asset) {
-	log.Print("New program \"", name, "\" found with the following assets:")
+	logger("New program \"" + name + "\" found with the following assets:")
 	for _, asset := range assets {
-		log.Print("\t", stringifyAsset(asset))
+		logger("\t" + stringifyAsset(asset))
 	}
 
 	directoryDocument := DirectoryDocument{
