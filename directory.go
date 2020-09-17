@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"net/http"
 )
 
@@ -83,14 +82,14 @@ func getDirectoryPageJSON(cursor string) string {
 
 	response, err := http.Post(url, "application/json", buf)
 	if err != nil {
-		log.Fatal(err)
+		logger(err)
 	}
 
 	defer response.Body.Close()
 
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		log.Fatal(err)
+		logger(err)
 	}
 
 	return string(body)

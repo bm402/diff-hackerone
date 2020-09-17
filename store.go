@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"log"
 	"strconv"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -26,12 +25,12 @@ func connectToDatabase() {
 
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
-		log.Fatal(err)
+		logger(err)
 	}
 
 	err = client.Ping(context.TODO(), nil)
 	if err != nil {
-		log.Fatal(err)
+		logger(err)
 	}
 
 	collection = client.Database("diff-hackerone").Collection("directory")
@@ -40,7 +39,7 @@ func connectToDatabase() {
 func getStoredDirectoryCount() int {
 	count, err := collection.CountDocuments(context.TODO(), bson.M{}, nil)
 	if err != nil {
-		log.Fatal(err)
+		logger(err)
 	}
 
 	logger("Number of stored programs: " + strconv.FormatInt(count, 10))
@@ -58,7 +57,7 @@ func insertFullDirectory(directory map[string][]Asset) {
 
 		_, err := collection.InsertOne(context.TODO(), directoryDocument)
 		if err != nil {
-			log.Fatal(err)
+			logger(err)
 		}
 	}
 }
@@ -70,11 +69,11 @@ func updateDirectory(directory map[string][]Asset) {
 	var existingDirectoryList []DirectoryDocument
 	cursor, err := collection.Find(context.TODO(), bson.M{})
 	if err != nil {
-		log.Fatal(err)
+		logger(err)
 	}
 	err = cursor.All(context.TODO(), &existingDirectoryList)
 	if err != nil {
-		log.Fatal(err)
+		logger(err)
 	}
 
 	existingDirectory := make(map[string][]Asset)
@@ -109,7 +108,7 @@ func updateDirectory(directory map[string][]Asset) {
 					isProgramUpdated = true
 					continue
 				} else {
-					log.Fatal(err)
+					logger(err)
 				}
 			}
 
@@ -139,6 +138,14 @@ func updateDirectory(directory map[string][]Asset) {
 			}
 			updateProgram(name, assets)
 		}
+
+		// Remove existing program from list to remove
+		delete(existingDirectory, name)
+	}
+
+	// Delete dead programs
+	for name := range existingDirectory {
+		deleteDeadProgram(name)
 	}
 
 	logger("Updated program directory")
@@ -157,7 +164,7 @@ func insertNewProgram(name string, assets []Asset) {
 
 	_, err := collection.InsertOne(context.TODO(), directoryDocument)
 	if err != nil {
-		log.Fatal(err)
+		logger(err)
 	}
 }
 
@@ -167,7 +174,15 @@ func updateProgram(name string, assets []Asset) {
 
 	_, err := collection.UpdateOne(context.TODO(), filter, update)
 	if err != nil {
-		log.Fatal(err)
+		logger(err)
+	}
+}
+
+func deleteDeadProgram(name string) {
+	logger("Deleting dead program \"" + name + "\"")
+	_, err := collection.DeleteOne(context.TODO(), bson.M{"name": name})
+	if err != nil {
+		logger(err)
 	}
 }
 
