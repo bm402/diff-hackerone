@@ -67,5 +67,8 @@ func sendRequestToSlack(slackRequestBody SlackRequestBody) {
 	buf.ReadFrom(response.Body)
 	if buf.String() != "ok" {
 		logger("Non-OK response returned from Slack")
+		return
 	}
+
+	logger("Slack notification sent")
 }

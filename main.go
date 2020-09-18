@@ -14,9 +14,7 @@ func main() {
 		logger(err)
 	}
 	defer f.Close()
-	flog = log.New(f, "", log.LstdFlags)
-
-	logger("== diff-hackerone ==")
+	flog = log.New(f, "diff-hackerone > ", log.LstdFlags)
 
 	connectToDatabase()
 	directory := getDirectory()
@@ -27,9 +25,6 @@ func main() {
 	} else {
 		insertFullDirectory(directory)
 	}
-
-	logger("== end diff-hackerone ==")
-	logger("")
 }
 
 func logger(message interface{}) {
