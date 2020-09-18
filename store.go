@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"strconv"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -19,8 +18,6 @@ type DirectoryDocument struct {
 var collection *mongo.Collection
 
 func connectToDatabase() {
-	logger("Connecting to MongoDB")
-
 	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
 
 	client, err := mongo.Connect(context.TODO(), clientOptions)
@@ -41,8 +38,6 @@ func getStoredDirectoryCount() int {
 	if err != nil {
 		logger(err)
 	}
-
-	logger("Number of stored programs: " + strconv.FormatInt(count, 10))
 	return int(count)
 }
 
@@ -63,7 +58,7 @@ func insertFullDirectory(directory map[string][]Asset) {
 }
 
 func updateDirectory(directory map[string][]Asset) {
-	logger("Updating directory in database...")
+	logger("Updating local directory")
 
 	// Get full existing directory
 	var existingDirectoryList []DirectoryDocument
@@ -164,8 +159,6 @@ func updateDirectory(directory map[string][]Asset) {
 	for name := range existingDirectory {
 		deleteDeadProgram(name)
 	}
-
-	logger("Updated program directory")
 }
 
 func insertNewProgram(name string, assets []Asset) {
